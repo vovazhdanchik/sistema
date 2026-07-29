@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Система</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Система">
+<meta name="theme-color" content="#14171a">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+  :root{
+    --bg:#14171a; --card:#1c2124; --card-hi:#22282b; --line:#2a3033;
+    --text:#eae7e0; --muted:#8b9096; --gold:#c9a227; --green:#8fa876; --red-dim:#a5645a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh; padding:calc(20px + env(safe-area-inset-top)) 16px calc(60px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+  header{margin-bottom:22px;}
+  .eyebrow{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+  h1{font-family:'Oswald',sans-serif;font-weight:600;font-size:30px;margin:0 0 4px;line-height:1.1;}
+  h2{font-family:'Oswald',sans-serif;font-weight:500;font-size:16px;margin:0 0 10px;letter-spacing:.01em;}
+  .date{color:var(--muted);font-size:14px;}
+
+  .rank-banner{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:18px 0 12px;}
+  .rank-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .rank-name{font-family:'Oswald',sans-serif;font-size:19px;font-weight:600;color:var(--gold);}
+  .rank-pts{font-size:12px;color:var(--muted);}
+  .rank-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;}
+  .rank-fill{height:100%;background:var(--green);}
+  .rank-next{font-size:11px;color:var(--muted);margin-top:6px;}
+
+  .banners{display:flex;gap:8px;margin-bottom:22px;}
+  .banner{flex:1;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;}
+  .banner .num{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--green);line-height:1;}
+  .banner.points .num{color:var(--gold);}
+  .banner .label{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.3;}
+
+  .habit{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;position:relative;}
+  .habit-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .habit-name{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;}
+  .habit-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+  .habit-streak{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right;}
+  .habit-streak b{color:var(--green);font-weight:600;}
+  .habit-streak.clean b{color:var(--red-dim);}
+  .del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px;}
+  .edit-btn{background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer;padding:0;margin-left:6px;}
+
+  .tap{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 0;border-radius:8px;border:1.5px solid var(--line);background:var(--card-hi);color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent;}
+  .tap.min{border-color:var(--gold);color:var(--gold);background:rgba(201,162,39,0.08);}
+  .tap.full{border-color:var(--green);color:var(--green);background:rgba(143,168,118,0.1);}
+  .tap.used{border-color:var(--red-dim);color:var(--red-dim);background:rgba(165,100,90,0.1);}
+  .tap:active{transform:scale(0.98);}
+  .checklist-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .tap.small{padding:10px 4px;font-size:12px;flex:1 1 60px;}
+  .glass-row{display:flex;gap:5px;flex-wrap:wrap;}
+  .glass{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--line);background:var(--card-hi);color:var(--muted);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .glass.full{border-color:var(--green);color:var(--green);background:rgba(143,168,118,0.12);}
+
+  .section{margin-top:28px;}
+  .grid-title{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+
+  .grid-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+  .grid-label{width:92px;flex-shrink:0;font-size:11.5px;color:var(--muted);}
+  .cells{display:flex;gap:4px;flex:1;}
+  .cell{flex:1;aspect-ratio:1;border-radius:3px;background:var(--line);}
+  .cell.min{background:var(--gold);opacity:0.55;} .cell.full{background:var(--green);} .cell.used{background:var(--red-dim);}
+  .cell.today{box-shadow:0 0 0 1.5px var(--text) inset;}
+  .day-labels{display:flex;gap:4px;padding-left:102px;margin-top:2px;}
+  .day-labels span{flex:1;text-align:center;font-size:9px;color:var(--muted);opacity:.6;}
+
+  .weekchart{display:flex;align-items:flex-end;gap:8px;height:110px;margin-bottom:6px;}
+  .wk-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .wk-bar{width:100%;background:var(--green);border-radius:3px 3px 0 0;min-height:2px;}
+  .wk-mark{font-size:9px;color:var(--red-dim);margin-top:3px;height:11px;}
+  .wk-label{font-size:9px;color:var(--muted);margin-top:2px;}
+
+  .badges{display:flex;flex-wrap:wrap;gap:8px;}
+  .badge{padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);font-size:11.5px;color:var(--muted);background:var(--card-hi);}
+  .badge.on{border-color:var(--gold);color:var(--gold);background:rgba(201,162,39,0.08);}
+
+  .reward-row{display:flex;align-items:center;justify-content:space-between;background:var(--card-hi);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+  .reward-name{font-size:13.5px;}
+  .reward-cost{font-size:11.5px;color:var(--gold);}
+  .reward-actions{display:flex;gap:6px;align-items:center;}
+  .btn{padding:8px 12px;border-radius:7px;border:1.5px solid var(--line);background:var(--card-hi);color:var(--text);font-size:12.5px;cursor:pointer;}
+  .btn.primary{border-color:var(--green);color:var(--green);}
+  .btn.ghost{color:var(--muted);}
+  .btn:disabled{opacity:.4;}
+
+  .form-row{display:flex;gap:6px;margin-bottom:8px;}
+  input[type=text],input[type=number]{background:var(--card-hi);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:9px 10px;font-size:13px;flex:1;font-family:'Inter',sans-serif;}
+  select{background:var(--card-hi);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:9px 8px;font-size:13px;font-family:'Inter',sans-serif;}
+
+  .review-box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;}
+  .review-line{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);}
+  .review-line:last-child{border-bottom:none;}
+  .review-line b{color:var(--green);}
+
+  .note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;}
+  .loading{color:var(--muted);font-size:13px;padding:20px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Личный протокол</div>
+    <h1>Система</h1>
+    <div class="date" id="todayLabel"></div>
+  </header>
+
+  <div class="rank-banner">
+    <div class="rank-top">
+      <div class="rank-name" id="rankName">—</div>
+      <div class="rank-pts" id="rankPts">0 очков всего</div>
+    </div>
+    <div class="rank-bar"><div class="rank-fill" id="rankFill" style="width:0%"></div></div>
+    <div class="rank-next" id="rankNext"></div>
+  </div>
+
+  <div class="banners">
+    <div class="banner"><div class="num" id="perfectStreak">0</div><div class="label">дней подряд закрыт минимум по всем</div></div>
+    <div class="banner points"><div class="num" id="balancePts">0</div><div class="label">баланс очков к трате на награды</div></div>
+  </div>
+
+  <div id="habitsRoot" class="loading">Загрузка…</div>
+
+  <div style="margin-bottom:24px;">
+    <button class="btn ghost" id="toggleAddHabit" style="width:100%;">+ добавить свою привычку</button>
+    <div id="addHabitForm" style="display:none;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;">
+      <div class="form-row"><input type="text" id="newHabitName" placeholder="Название привычки"></div>
+      <div class="form-row">
+        <select id="newHabitType">
+          <option value="cycle">Обычная (мин / полностью)</option>
+          <option value="checklist">Чек-лист по пунктам (через запятую)</option>
+        </select>
+      </div>
+      <div class="form-row" id="newHabitItemsRow" style="display:none;">
+        <input type="text" id="newHabitItems" placeholder="напр: сценарий, монтаж, загрузка">
+      </div>
+      <button class="btn primary" id="saveNewHabit" style="width:100%;">Создать</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-title">Неделя в разборе</div>
+    <div class="review-box" id="reviewBox"></div>
+  </div>
+
+  <div class="section">
+    <div class="grid-title">Очки по неделям</div>
+    <div class="weekchart" id="weekChart"></div>
+    <div class="note">Красная цифра под столбиком — сколько дней на той неделе была отмечена трава/алкоголь. Смотри сам, есть ли связь с провалами по очкам.</div>
+  </div>
+
+  <div class="section">
+    <div class="grid-title">Достижения</div>
+    <div class="badges" id="badgesRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="grid-title">Награды</div>
+    <div id="rewardsList"></div>
+    <div class="form-row" style="margin-top:10px;">
+      <input type="text" id="newRewardName" placeholder="Название награды">
+      <input type="number" id="newRewardCost" placeholder="Цена" style="max-width:80px;">
+    </div>
+    <button class="btn primary" id="addRewardBtn" style="width:100%;">Добавить награду</button>
+    <div class="note">Очки не связаны с вредными привычками автоматически — только с тем, что ты сам сюда впишешь.</div>
+  </div>
+
+  <div class="section">
+    <div class="grid-title">Последние 14 дней</div>
+    <div id="gridRoot"></div>
+    <div class="day-labels" id="dayLabels"></div>
+  </div>
+
+  <div class="section">
+    <button class="btn ghost" id="exportBtn" style="width:100%;">Экспортировать данные (JSON)</button>
+  </div>
+</div>
+
+<script>
+const DEFAULT_HABITS = [
+  {key:'english', name:'Английский', sub:'Duolingo — минимум 1 упражнение', type:'cycle', points:{min:2, full:4}, builtin:true},
+  {key:'media_lang', name:'Язык через медиа', sub:'субтитры песен / сериалов — разобрать минимум 1 фразу', type:'cycle', points:{min:1, full:2}, builtin:true},
+  {key:'speech', name:'Речь и словарный запас', sub:'новое слово, оборот или мысль вслух', type:'cycle', points:{min:1, full:2}, builtin:true},
+  {key:'sport', name:'Спорт', sub:'подтягивания / отжимания / гантели (молотки)', type:'checklist', perItem:3, builtin:true,
+    items:[{key:'pullups',label:'Подтяг.'},{key:'pushups',label:'Отжим.'},{key:'dumbbells',label:'Гантели'}]},
+  {key:'gym', name:'Утренняя гимнастика', sub:'Иван Красавин — минимум 5 мин', type:'cycle', points:{min:2, full:4}, builtin:true},
+  {key:'nutrition', name:'Питание', sub:'три приёма пищи', type:'checklist', perItem:1, builtin:true,
+    items:[{key:'breakfast',label:'Завтрак'},{key:'lunch',label:'Обед'},{key:'dinner',label:'Ужин'}]},
+  {key:'water', name:'Вода', sub:'стаканов ≈ 250мл каждый', type:'glasses', count:8, pointsPerTwo:1, builtin:true},
+  {key:'youtube', name:'Заработок / YouTube', sub:'сценарий → генерация → монтаж → загрузка', type:'checklist', perItem:1, builtin:true,
+    items:[{key:'script',label:'Сценарий'},{key:'gen',label:'Генерация'},{key:'edit',label:'Монтаж'},{key:'upload',label:'Загрузка'}]},
+  {key:'substance', name:'Трава / алкоголь', sub:'только фиксация факта — без очков', type:'awareness', builtin:true},
+];
+
+const RANKS = [
+  {name:'Новичок', min:0},
+  {name:'Держит планку', min:60},
+  {name:'Дисциплина', min:180},
+  {name:'Система', min:400},
+  {name:'Мастер', min:800},
+];
+
+let habits = [];
+let data = {};
+let rewards = [];
+let redeemLog = [];
+
+function fmtDate(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function todayKey(){ return fmtDate(new Date()); }
+function dayLabelRu(d){ return ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()]; }
+function uid(){ return 'h'+Math.random().toString(36).slice(2,9); }
+
+async function safeGet(key){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+  catch(e){ return null; }
+}
+async function safeSet(key,val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e){ console.error('save fail',key,e); }
+}
+
+async function loadAll(){
+  const cfg = await safeGet('habit-config');
+  habits = cfg && Array.isArray(cfg) && cfg.length ? cfg : DEFAULT_HABITS.slice();
+  data = (await safeGet('habit-data')) || {};
+  rewards = (await safeGet('rewards-config')) || [];
+  redeemLog = (await safeGet('redeem-log')) || [];
+}
+async function saveConfig(){ await safeSet('habit-config', habits); }
+async function saveData(){ await safeSet('habit-data', data); }
+async function saveRewards(){ await safeSet('rewards-config', rewards); }
+async function saveRedeemLog(){ await safeSet('redeem-log', redeemLog); }
+
+function itemKeysOf(h){
+  if(h.type==='glasses') return Array.from({length:h.count},(_,i)=>'g'+i);
+  if(h.type==='checklist') return h.items.map(it=>it.key);
+  return [];
+}
+
+function getState(dateKey, h){
+  const entry = data[dateKey] && data[dateKey][h.key];
+  if(h.type === 'awareness') return entry ? 3 : 0;
+  if(!entry) return 0;
+  if(h.type === 'checklist' || h.type === 'glasses'){
+    const keys = itemKeysOf(h);
+    const done = keys.filter(k=>entry[k]).length;
+    if(done===0) return 0;
+    if(done===keys.length) return 2;
+    return 1;
+  }
+  return entry || 0;
+}
+function stateClass(s){ if(s===1)return'min'; if(s===2)return'full'; if(s===3)return'used'; return ''; }
+
+function cycleState(key){
+  const h = habits.find(x=>x.key===key);
+  const dk = todayKey();
+  if(!data[dk]) data[dk]={};
+  data[dk][key] = ((data[dk][key]||0)+1)%3;
+  saveData(); render();
+}
+function toggleItem(key, itemKey){
+  const dk = todayKey();
+  if(!data[dk]) data[dk]={};
+  if(!data[dk][key] || typeof data[dk][key] !== 'object') data[dk][key]={};
+  data[dk][key][itemKey] = !data[dk][key][itemKey];
+  saveData(); render();
+}
+function toggleAwareness(key){
+  const dk = todayKey();
+  if(!data[dk]) data[dk]={};
+  data[dk][key] = !data[dk][key];
+  saveData(); render();
+}
+
+function computeHabitStreak(h){
+  let streak=0, d=new Date();
+  for(let g=0; g<3650; g++){
+    const k=fmtDate(d);
+    if(h.type==='awareness'){
+      const used = data[k] && data[k][h.key];
+      if(!used){streak++; d.setDate(d.getDate()-1);} else break;
+    } else {
+      if(getState(k,h)>=1){streak++; d.setDate(d.getDate()-1);} else break;
+    }
+  }
+  return streak;
+}
+
+function earliestDataDate(){
+  const keys = Object.keys(data);
+  if(!keys.length) return new Date();
+  keys.sort();
+  return new Date(keys[0]+'T00:00:00');
+}
+
+function computeLongestStreak(h){
+  const start = earliestDataDate();
+  const end = new Date();
+  let d = new Date(start);
+  let cur=0, best=0;
+  while(d <= end){
+    const k = fmtDate(d);
+    let ok;
+    if(h.type==='awareness') ok = !(data[k] && data[k][h.key]);
+    else ok = getState(k,h) >= 1;
+    if(ok){ cur++; best=Math.max(best,cur); } else cur=0;
+    d.setDate(d.getDate()+1);
+  }
+  return best;
+}
+
+function computePerfectStreak(){
+  const trackable = habits.filter(h=>h.type!=='awareness');
+  let streak=0, d=new Date();
+  for(let g=0; g<3650; g++){
+    const k=fmtDate(d);
+    const entry = data[k];
+    const allMin = entry && trackable.every(h=>getState(k,h)>=1);
+    if(allMin){ streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak;
+}
+
+function pointsForDay(dk){
+  let total=0;
+  habits.forEach(h=>{
+    if(h.type==='awareness') return;
+    const entry = data[dk] && data[dk][h.key];
+    if(!entry) return;
+    if(h.type==='cycle'){
+      if(entry===1) total+=h.points.min;
+      if(entry===2) total+=h.points.full;
+    } else if(h.type==='checklist'){
+      const done = h.items.filter(it=>entry[it.key]).length;
+      total += done*h.perItem;
+    } else if(h.type==='glasses'){
+      const keys = itemKeysOf(h);
+      const done = keys.filter(k=>entry[k]).length;
+      total += Math.floor(done/2)*h.pointsPerTwo;
+    }
+  });
+  return total;
+}
+
+function totalEarnedAllTime(){
+  const start = earliestDataDate();
+  const end = new Date();
+  let d = new Date(start), total=0;
+  while(d<=end){ total += pointsForDay(fmtDate(d)); d.setDate(d.getDate()+1); }
+  return total;
+}
+function totalRedeemed(){ return redeemLog.reduce((s,r)=>s+r.cost,0); }
+
+function getRank(points){
+  let cur = RANKS[0], next = RANKS[1];
+  for(let i=0;i<RANKS.length;i++){
+    if(points>=RANKS[i].min){ cur=RANKS[i]; next=RANKS[i+1]||null; }
+  }
+  return {cur,next};
+}
+
+function addCustomHabit(name, type, itemsRaw){
+  const key = uid();
+  if(type==='cycle'){
+    habits.push({key,name,sub:'своя привычка',type:'cycle',points:{min:1,full:2},builtin:false});
+  } else {
+    const items = itemsRaw.split(',').map(s=>s.trim()).filter(Boolean).map(label=>({key:uid(),label}));
+    if(!items.length) return;
+    habits.push({key,name,sub:items.map(i=>i.label).join(' / '),type:'checklist',perItem:1,builtin:false,items});
+  }
+  saveConfig(); render();
+}
+function deleteHabit(key){
+  habits = habits.filter(h=>h.key!==key);
+  saveConfig(); render();
+}
+
+function addReward(name,cost){
+  rewards.push({id:uid(),name,cost:Number(cost)||1});
+  saveRewards(); render();
+}
+function deleteReward(id){ rewards = rewards.filter(r=>r.id!==id); saveRewards(); render(); }
+function redeemReward(id){
+  const r = rewards.find(x=>x.id===id);
+  if(!r) return;
+  const balance = totalEarnedAllTime() - totalRedeemed();
+  if(balance < r.cost) return;
+  redeemLog.push({date:todayKey(), rewardId:id, name:r.name, cost:r.cost});
+  saveRedeemLog(); render();
+}
+
+function editWaterTarget(){
+  const h = habits.find(x=>x.key==='water');
+  const input = prompt ? null : null; // prompt disabled in sandbox fallback below
+  render(); // no-op placeholder, replaced by inline UI below
+}
+
+function exportData(){
+  const payload = {habits, data, rewards, redeemLog, exportedAt:new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download = 'sistema-export-'+todayKey()+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+function render(){
+  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('perfectStreak').textContent = computePerfectStreak();
+
+  const earned = totalEarnedAllTime();
+  const balance = earned - totalRedeemed();
+  document.getElementById('balancePts').textContent = balance;
+
+  const {cur,next} = getRank(earned);
+  document.getElementById('rankName').textContent = cur.name;
+  document.getElementById('rankPts').textContent = earned+' очков всего';
+  if(next){
+    const pct = Math.min(100, Math.round(((earned-cur.min)/(next.min-cur.min))*100));
+    document.getElementById('rankFill').style.width = pct+'%';
+    document.getElementById('rankNext').textContent = `до «${next.name}» ещё ${next.min-earned} очк.`;
+  } else {
+    document.getElementById('rankFill').style.width = '100%';
+    document.getElementById('rankNext').textContent = 'максимальный ранг';
+  }
+
+  // habits
+  const root = document.getElementById('habitsRoot');
+  root.className='';
+  root.innerHTML = habits.map(h=>{
+    const s = getState(todayKey(), h);
+    const streak = computeHabitStreak(h);
+    const streakLabel = h.type==='awareness' ? 'без' : 'серия';
+    const streakClass = h.type==='awareness' ? 'habit-streak clean' : 'habit-streak';
+    const delBtn = h.builtin ? '' : `<button class="del-btn" onclick="deleteHabit('${h.key}')">✕</button>`;
+
+    let body;
+    if(h.type==='checklist'){
+      const entry = (data[todayKey()] && data[todayKey()][h.key]) || {};
+      body = `<div class="checklist-row">${h.items.map(it=>{
+        const checked = !!entry[it.key];
+        return `<button class="tap small ${checked?'full':''}" onclick="toggleItem('${h.key}','${it.key}')">${it.label}</button>`;
+      }).join('')}</div>`;
+    } else if(h.type==='glasses'){
+      const entry = (data[todayKey()] && data[todayKey()][h.key]) || {};
+      const glasses = itemKeysOf(h).map((k,i)=>{
+        const checked = !!entry[k];
+        return `<button class="glass ${checked?'full':''}" onclick="toggleItem('${h.key}','${k}')">${i+1}</button>`;
+      }).join('');
+      body = `<div class="glass-row">${glasses}</div>`;
+    } else if(h.type==='awareness'){
+      const marked = getState(todayKey(),h)===3;
+      body = `<button class="tap ${marked?'used':''}" onclick="toggleAwareness('${h.key}')">${marked?'Было сегодня':'Не было сегодня'}</button>`;
+    } else {
+      const label = s===2?'Сделано полностью':s===1?'Минимум закрыт':'Отметить сегодня';
+      body = `<button class="tap ${stateClass(s)}" onclick="cycleState('${h.key}')">${label}</button>`;
+    }
+
+    const targetEdit = h.type==='glasses'
+      ? (editingWaterTarget
+          ? `<div style="display:flex;gap:6px;margin-top:6px;"><input type="number" id="waterTargetInput" value="${h.count}" style="max-width:70px;"><button class="btn primary" onclick="saveWaterTarget()">ОК</button></div>`
+          : `<button class="edit-btn" onclick="promptWaterTarget()">изменить цель (${h.count})</button>`)
+      : '';
+
+    return `<div class="habit">${delBtn}
+      <div class="habit-top">
+        <div><div class="habit-name">${h.name}</div><div class="habit-sub">${h.sub}${targetEdit}</div></div>
+        <div class="${streakClass}">${streakLabel}<br><b>${streak}</b> дн.</div>
+      </div>
+      ${body}
+    </div>`;
+  }).join('');
+
+  // 14-day grid
+  const days=[]; for(let i=13;i>=0;i--){const d=new Date(); d.setDate(d.getDate()-i); days.push(d);}
+  document.getElementById('gridRoot').innerHTML = habits.map(h=>{
+    const cells = days.map(d=>{
+      const k=fmtDate(d); const s=getState(k,h); const isToday = k===todayKey();
+      return `<div class="cell ${stateClass(s)} ${isToday?'today':''}"></div>`;
+    }).join('');
+    return `<div class="grid-row"><div class="grid-label">${h.name}</div><div class="cells">${cells}</div></div>`;
+  }).join('');
+  document.getElementById('dayLabels').innerHTML = days.map(d=>`<span>${dayLabelRu(d)[0]}</span>`).join('');
+
+  // weekly review (last 7 days)
+  const reviewLines = habits.filter(h=>h.type!=='awareness').map(h=>{
+    let count=0;
+    for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()-i); if(getState(fmtDate(d),h)>=1) count++; }
+    return `<div class="review-line"><span>${h.name}</span><b>${count}/7</b></div>`;
+  }).join('');
+  let weekPts=0, substanceDays=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(); d.setDate(d.getDate()-i); const k=fmtDate(d);
+    weekPts += pointsForDay(k);
+    if(data[k] && data[k]['substance']) substanceDays++;
+  }
+  document.getElementById('reviewBox').innerHTML = reviewLines +
+    `<div class="review-line"><span>Очков за неделю</span><b>${weekPts}</b></div>` +
+    `<div class="review-line"><span>Дней с травой/алко</span><b>${substanceDays}</b></div>`;
+
+  // weekly points chart, last 8 weeks
+  const weeks=[];
+  for(let w=7; w>=0; w--){
+    let sum=0, sub=0;
+    for(let i=0;i<7;i++){
+      const d=new Date(); d.setDate(d.getDate() - (w*7+i)); const k=fmtDate(d);
+      sum += pointsForDay(k);
+      if(data[k] && data[k]['substance']) sub++;
+    }
+    weeks.push({sum,sub});
+  }
+  const maxSum = Math.max(1, ...weeks.map(w=>w.sum));
+  document.getElementById('weekChart').innerHTML = weeks.map((w,i)=>{
+    const h = Math.max(2, Math.round((w.sum/maxSum)*90));
+    return `<div class="wk-col">
+      <div class="wk-bar" style="height:${h}px"></div>
+      <div class="wk-mark">${w.sub>0? '●'+w.sub : ''}</div>
+      <div class="wk-label">${i===7?'эта':'-'+(7-i)}</div>
+    </div>`;
+  }).join('');
+
+  // achievements
+  const thresholds = [3,7,14,30,60,100];
+  const bestPerfect = (()=>{ // longest all-min streak historically
+    const start = earliestDataDate(); const end = new Date();
+    const trackable = habits.filter(h=>h.type!=='awareness');
+    let d=new Date(start), cur=0, best=0;
+    while(d<=end){
+      const k=fmtDate(d);
+      const ok = data[k] && trackable.every(h=>getState(k,h)>=1);
+      if(ok){cur++; best=Math.max(best,cur);} else cur=0;
+      d.setDate(d.getDate()+1);
+    }
+    return best;
+  })();
+  document.getElementById('badgesRow').innerHTML = thresholds.map(t=>
+    `<div class="badge ${bestPerfect>=t?'on':''}">${t} дн.</div>`
+  ).join('');
+
+  // rewards
+  document.getElementById('rewardsList').innerHTML = rewards.length ? rewards.map(r=>{
+    const canAfford = balance >= r.cost;
+    return `<div class="reward-row">
+      <div><div class="reward-name">${r.name}</div><div class="reward-cost">${r.cost} очк.</div></div>
+      <div class="reward-actions">
+        <button class="btn primary" ${canAfford?'':'disabled'} onclick="redeemReward('${r.id}')">Забрать</button>
+        <button class="btn ghost" onclick="deleteReward('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="note">Пока пусто — добавь свою первую награду ниже.</div>';
+}
+
+let editingWaterTarget = false;
+
+function promptWaterTarget(){
+  editingWaterTarget = true;
+  render();
+}
+function saveWaterTarget(){
+  const h = habits.find(x=>x.key==='water');
+  const v = document.getElementById('waterTargetInput').value;
+  if(v && !isNaN(Number(v)) && Number(v)>0){
+    h.count = Math.round(Number(v));
+    saveConfig();
+  }
+  editingWaterTarget = false;
+  render();
+}
+
+document.getElementById('toggleAddHabit').addEventListener('click', ()=>{
+  const f = document.getElementById('addHabitForm');
+  f.style.display = f.style.display==='none' ? 'block' : 'none';
+});
+document.getElementById('newHabitType').addEventListener('change', (e)=>{
+  document.getElementById('newHabitItemsRow').style.display = e.target.value==='checklist' ? 'flex' : 'none';
+});
+document.getElementById('saveNewHabit').addEventListener('click', ()=>{
+  const name = document.getElementById('newHabitName').value.trim();
+  const type = document.getElementById('newHabitType').value;
+  const itemsRaw = document.getElementById('newHabitItems').value;
+  if(!name) return;
+  addCustomHabit(name, type, itemsRaw);
+  document.getElementById('newHabitName').value='';
+  document.getElementById('newHabitItems').value='';
+  document.getElementById('addHabitForm').style.display='none';
+});
+document.getElementById('addRewardBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('newRewardName').value.trim();
+  const cost = document.getElementById('newRewardCost').value;
+  if(!name || !cost) return;
+  addReward(name,cost);
+  document.getElementById('newRewardName').value='';
+  document.getElementById('newRewardCost').value='';
+});
+document.getElementById('exportBtn').addEventListener('click', exportData);
+
+(async function init(){
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
